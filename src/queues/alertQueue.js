@@ -1,9 +1,15 @@
 const { Queue } = require('bullmq');
 
-const connection = {
-  host: process.env.REDIS_HOST || 'localhost',
-  port: process.env.REDIS_PORT || 6379,
-};
+const connection = process.env.REDIS_URL
+  ? (() => {
+      const url = new URL(process.env.REDIS_URL);
+      return {
+        host: url.hostname,
+        port: parseInt(url.port),
+        password: url.password || undefined,
+      };
+    })()
+  : { host: 'localhost', port: 6379 };
 
 const alertQueue = new Queue('alert-checks', {
   connection,
